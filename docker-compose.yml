@@ -5,4 +5,4 @@ services:
       dockerfile: Dockerfile
     init: true
     volumes:
-      - ./files/config.toml:/etc/minecraft-webhook/config.toml:rw
+      - ./files/config.toml:/etc/minecraft-webhook/config.toml:ro
