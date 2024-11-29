@@ -1,14 +1,14 @@
 # Build the daemon
 FROM debian:bookworm-slim AS buildenv
 
-ENV APT_PACKAGES="build-essential ca-certificates curl git libssl-dev pkg-config"
+ENV APT_PACKAGES="build-essential ca-certificates curl git"
 ENV DEBIAN_FRONTEND="noninteractive"
 RUN apt-get update \
     && apt-get upgrade --yes \
     && apt-get install --yes --no-install-recommends ${APT_PACKAGES}
 
 RUN curl --tlsv1.3 --output rustup.sh https://sh.rustup.rs \
-    && sh rustup.sh -y
+    && sh rustup.sh -y --profile=minimal
 
 RUN git clone https://github.com/KizzyCode/MinecraftWebhook-rust \
     && /root/.cargo/bin/cargo install --path MinecraftWebhook-rust --bins minecraft-webhook
