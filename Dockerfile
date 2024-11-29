@@ -1,17 +1,25 @@
 # Build the daemon
-FROM alpine:latest AS buildenv
+FROM debian:bookworm-slim AS buildenv
 
-RUN apk add --no-cache cargo
-RUN cargo install --git https://github.com/KizzyCode/MinecraftWebhook-rust
+ENV APT_PACKAGES="build-essential ca-certificates curl git libssl-dev pkg-config"
+ENV DEBIAN_FRONTEND="noninteractive"
+RUN apt-get update \
+    && apt-get upgrade --yes \
+    && apt-get install --yes --no-install-recommends ${APT_PACKAGES}
+
+RUN curl --tlsv1.3 --output rustup.sh https://sh.rustup.rs \
+    && sh rustup.sh -y
+
+RUN git clone https://github.com/KizzyCode/MinecraftWebhook-rust \
+    && /root/.cargo/bin/cargo install --path MinecraftWebhook-rust --bins minecraft-webhook
 
 
 # Build the real container
-FROM alpine:latest
+FROM debian:bookworm-slim
 
-RUN apk add --no-cache libgcc
 COPY --from=buildenv /root/.cargo/bin/minecraft-webhook /usr/local/bin/minecraft-webhook
 
-RUN adduser -S -H -D -u 1000 -s /sbin/nologin minecraft-webhook
+RUN adduser --system --shell=/bin/nologin --uid=1000 minecraft-webhook
 USER minecraft-webhook
 
 WORKDIR /etc/minecraft-webhook
